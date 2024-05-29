@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Add/Edit Flashcard</h1>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.dish.label }}<br>
+        {{ form.dish(size=32) }}
+    </p>
+    <p>
+        {{ form.beverage.label }}<br>
+        {{ form.beverage(size=32) }}
+    </p>
+    <p>
+        {{ form.ingredients.label }}<br>
+        {{ form.ingredients(rows=4, cols=40) }}
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Test Yourself</h1>
+<p>Choose the ingredients for the selected beverage by dragging the items into the drop zone.</p>
+<div id="ingredients-container">
+    {% for card in flashcards %}
+        <div id="ingredient{{ card.id }}" class="ingredient-item" draggable="true">{{ card.ingredients }}</div>
+    {% endfor %}
+</div>
+<div id="drop-zone" style="min-height: 100px; border: 2px dashed #ddd; margin-top: 20px;"></div>
+{% endblock %}
