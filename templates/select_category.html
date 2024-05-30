@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1>Select Category</h1>
-<form method="POST" action="{{ url_for('test') }}">
+<form method="POST" action="{{ url_for('select_category') }}">
     <select name="category" class="form-control">
         {% for category in categories %}
             <option value="{{ category[0] }}">{{ category[0] }}</option>
