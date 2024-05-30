@@ -7,3 +7,4 @@ class Flashcard(db.Model):
     dish = db.Column(db.String(100), nullable=False)
     beverage = db.Column(db.String(100), nullable=False)
     ingredients = db.Column(db.Text, nullable=False)
+    category = db.Column(db.String(50), nullable=False)  # New field for category
