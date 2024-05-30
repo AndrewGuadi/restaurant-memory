@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1>Test Yourself</h1>
-<p>Choose the ingredients for {{ flashcard.beverage }} by dragging the items into the drop zone.</p>
+<p>Choose the ingredients for <strong>{{ flashcard.beverage }}</strong> by dragging or tapping the items into the drop zone.</p>
 
 <!-- Tabs for ingredient categories -->
 <ul class="nav nav-tabs" id="ingredientTabs" role="tablist">
@@ -41,7 +41,7 @@
 </div>
 
 <div id="drop-zone" class="mt-4 p-3" style="border: 2px dashed #ccc; height: 200px; display: flex; align-items: center; justify-content: center;">
-    Drop ingredients here
+    Drop or tap ingredients here
 </div>
 
 <form method="POST" action="{{ url_for('test') }}">
@@ -51,59 +51,107 @@
 </form>
 
 {% if result %}
-    <h2>Result</h2>
-    <p>Selected Ingredients: {{ result.selected_ingredients }}</p>
-    <p>Correct Ingredients: {{ result.correct_ingredients }}</p>
-    <p>Correct: {{ result.is_correct }}</p>
+    <div class="mt-5">
+        <h2>Result</h2>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Your Selection</h5>
+                <ul class="list-group">
+                    {% for ingredient in result.selected_ingredients %}
+                        <li class="list-group-item">{{ ingredient }}</li>
+                    {% endfor %}
+                </ul>
+                <h5 class="card-title mt-4">Correct Ingredients</h5>
+                <ul class="list-group">
+                    {% for ingredient in result.correct_ingredients %}
+                        <li class="list-group-item">{{ ingredient }}</li>
+                    {% endfor %}
+                </ul>
+                <div class="mt-4">
+                    {% if result.is_correct %}
+                        <div class="alert alert-success" role="alert">
+                            <i class="bi bi-check-circle"></i> Correct!
+                        </div>
+                    {% else %}
+                        <div class="alert alert-danger" role="alert">
+                            <i class="bi bi-x-circle"></i> Incorrect!
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 {% endif %}
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const ingredients = document.querySelectorAll('.ingredient-item');
-        const dropZone = document.querySelector('#drop-zone');
-        let selectedIngredients = [];
-    
-        const maxIngredients = {
-            liquids: 5,
-            solids: 5,
-            garnishes: 5
-        };
-    
-        ingredients.forEach(ingredient => {
-            ingredient.addEventListener('dragstart', handleDragStart);
-            ingredient.addEventListener('dragend', handleDragEnd);
-        });
-    
-        dropZone.addEventListener('dragover', handleDragOver);
-        dropZone.addEventListener('drop', handleDrop);
-    
-        function handleDragStart(e) {
-            e.dataTransfer.setData('text/plain', e.target.id);
-            e.target.classList.add('dragging');
+document.addEventListener('DOMContentLoaded', function () {
+    const ingredients = document.querySelectorAll('.ingredient-item');
+    const dropZone = document.querySelector('#drop-zone');
+    let selectedIngredients = [];
+
+    const maxIngredients = {
+        liquids: 5,
+        solids: 5,
+        garnishes: 5
+    };
+
+    ingredients.forEach(ingredient => {
+        ingredient.addEventListener('dragstart', handleDragStart);
+        ingredient.addEventListener('dragend', handleDragEnd);
+        ingredient.addEventListener('click', handleTouch); // Add touch event listener
+    });
+
+    dropZone.addEventListener('dragover', handleDragOver);
+    dropZone.addEventListener('drop', handleDrop);
+    dropZone.addEventListener('click', handleRemove); // Add click event listener for removing
+
+    function handleDragStart(e) {
+        e.dataTransfer.setData('text/plain', e.target.id);
+        e.target.classList.add('dragging');
+    }
+
+    function handleDragEnd(e) {
+        e.target.classList.remove('dragging');
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        const id = e.dataTransfer.getData('text');
+        const ingredient = document.getElementById(id);
+        const category = ingredient.parentElement.id.split('-')[0];
+        const categoryCount = selectedIngredients.filter(ing => ing.category === category).length;
+
+        if (categoryCount < maxIngredients[category] && !selectedIngredients.some(ing => ing.text === ingredient.textContent)) {
+            selectedIngredients.push({ text: ingredient.textContent, category: category });
+            dropZone.appendChild(ingredient);
         }
-    
-        function handleDragEnd(e) {
-            e.target.classList.remove('dragging');
+        document.getElementById('selected-ingredients').value = selectedIngredients.map(ing => ing.text).join(',');
+    }
+
+    function handleTouch(e) {
+        const ingredient = e.target;
+        const category = ingredient.parentElement.id.split('-')[0];
+        const categoryCount = selectedIngredients.filter(ing => ing.category === category).length;
+
+        if (categoryCount < maxIngredients[category] && !selectedIngredients.some(ing => ing.text === ingredient.textContent)) {
+            selectedIngredients.push({ text: ingredient.textContent, category: category });
+            dropZone.appendChild(ingredient);
         }
-    
-        function handleDragOver(e) {
-            e.preventDefault();
-        }
-    
-        function handleDrop(e) {
-            e.preventDefault();
-            const id = e.dataTransfer.getData('text');
-            const ingredient = document.getElementById(id);
-            const category = ingredient.parentElement.id.split('-')[0];
-            const categoryCount = selectedIngredients.filter(ing => ing.category === category).length;
-    
-            if (categoryCount < maxIngredients[category] && !selectedIngredients.some(ing => ing.text === ingredient.textContent)) {
-                selectedIngredients.push({ text: ingredient.textContent, category: category });
-                dropZone.appendChild(ingredient);
-            }
+        document.getElementById('selected-ingredients').value = selectedIngredients.map(ing => ing.text).join(',');
+    }
+
+    function handleRemove(e) {
+        const ingredient = e.target;
+        if (dropZone.contains(ingredient)) {
+            selectedIngredients = selectedIngredients.filter(ing => ing.text !== ingredient.textContent);
+            ingredient.remove();
             document.getElementById('selected-ingredients').value = selectedIngredients.map(ing => ing.text).join(',');
         }
-    });
-    </script>
-    
+    }
+});
+</script>
 {% endblock %}
