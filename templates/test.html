@@ -3,11 +3,43 @@
 {% block content %}
 <h1>Test Yourself</h1>
 <p>Choose the ingredients for {{ flashcard.beverage }} by dragging the items into the drop zone.</p>
-<div id="ingredients-container" class="d-flex flex-wrap">
-    {% for ingredient in all_ingredients %}
-        <div id="ingredient{{ loop.index }}" class="ingredient-item" draggable="true">{{ ingredient }}</div>
-    {% endfor %}
+
+<!-- Tabs for ingredient categories -->
+<ul class="nav nav-tabs" id="ingredientTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <a class="nav-link active" id="liquids-tab" data-toggle="tab" href="#liquids" role="tab" aria-controls="liquids" aria-selected="true">Liquids</a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" id="solids-tab" data-toggle="tab" href="#solids" role="tab" aria-controls="solids" aria-selected="false">Solids</a>
+    </li>
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" id="garnishes-tab" data-toggle="tab" href="#garnishes" role="tab" aria-controls="garnishes" aria-selected="false">Garnishes</a>
+    </li>
+</ul>
+<div class="tab-content" id="ingredientTabsContent">
+    <div class="tab-pane fade show active" id="liquids" role="tabpanel" aria-labelledby="liquids-tab">
+        <div id="liquids-container" class="d-flex flex-wrap">
+            {% for ingredient in liquids %}
+                <div id="ingredient{{ loop.index }}" class="ingredient-item" draggable="true">{{ ingredient }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="tab-pane fade" id="solids" role="tabpanel" aria-labelledby="solids-tab">
+        <div id="solids-container" class="d-flex flex-wrap">
+            {% for ingredient in solids %}
+                <div id="ingredient{{ loop.index }}" class="ingredient-item" draggable="true">{{ ingredient }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="tab-pane fade" id="garnishes" role="tabpanel" aria-labelledby="garnishes-tab">
+        <div id="garnishes-container" class="d-flex flex-wrap">
+            {% for ingredient in garnishes %}
+                <div id="ingredient{{ loop.index }}" class="ingredient-item" draggable="true">{{ ingredient }}</div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
+
 <div id="drop-zone" class="mt-4 p-3" style="border: 2px dashed #ccc; height: 200px; display: flex; align-items: center; justify-content: center;">
     Drop ingredients here
 </div>
@@ -26,40 +58,52 @@
 {% endif %}
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const ingredients = document.querySelectorAll('.ingredient-item');
-    const dropZone = document.querySelector('#drop-zone');
-    let selectedIngredients = [];
-
-    ingredients.forEach(ingredient => {
-        ingredient.addEventListener('dragstart', handleDragStart);
-        ingredient.addEventListener('dragend', handleDragEnd);
+    document.addEventListener('DOMContentLoaded', function () {
+        const ingredients = document.querySelectorAll('.ingredient-item');
+        const dropZone = document.querySelector('#drop-zone');
+        let selectedIngredients = [];
+    
+        const maxIngredients = {
+            liquids: 5,
+            solids: 5,
+            garnishes: 5
+        };
+    
+        ingredients.forEach(ingredient => {
+            ingredient.addEventListener('dragstart', handleDragStart);
+            ingredient.addEventListener('dragend', handleDragEnd);
+        });
+    
+        dropZone.addEventListener('dragover', handleDragOver);
+        dropZone.addEventListener('drop', handleDrop);
+    
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.id);
+            e.target.classList.add('dragging');
+        }
+    
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+    
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+    
+        function handleDrop(e) {
+            e.preventDefault();
+            const id = e.dataTransfer.getData('text');
+            const ingredient = document.getElementById(id);
+            const category = ingredient.parentElement.id.split('-')[0];
+            const categoryCount = selectedIngredients.filter(ing => ing.category === category).length;
+    
+            if (categoryCount < maxIngredients[category] && !selectedIngredients.some(ing => ing.text === ingredient.textContent)) {
+                selectedIngredients.push({ text: ingredient.textContent, category: category });
+                dropZone.appendChild(ingredient);
+            }
+            document.getElementById('selected-ingredients').value = selectedIngredients.map(ing => ing.text).join(',');
+        }
     });
-
-    dropZone.addEventListener('dragover', handleDragOver);
-    dropZone.addEventListener('drop', handleDrop);
-
-    function handleDragStart(e) {
-        e.dataTransfer.setData('text/plain', e.target.id);
-        e.target.classList.add('dragging');
-    }
-
-    function handleDragEnd(e) {
-        e.target.classList.remove('dragging');
-    }
-
-    function handleDragOver(e) {
-        e.preventDefault();
-    }
-
-    function handleDrop(e) {
-        e.preventDefault();
-        const id = e.dataTransfer.getData('text');
-        const draggable = document.getElementById(id);
-        dropZone.appendChild(draggable);
-        selectedIngredients.push(draggable.textContent.trim());
-        document.getElementById('selected-ingredients').value = selectedIngredients.join(',');
-    }
-});
-</script>
+    </script>
+    
 {% endblock %}

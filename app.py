@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from models import db, Flashcard
 from forms import FlashcardForm
 from flask_migrate import Migrate
+import random
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flashcards.db'
@@ -61,8 +62,8 @@ def select_category():
 @app.route('/test', methods=['GET', 'POST'])
 def test():
     if request.method == 'POST':
-        flashcard_id = int(request.form.get('flashcard_id'))
-        selected_ingredients = request.form.get('selected_ingredients', '').split(',')
+        flashcard_id = request.form['flashcard_id']
+        selected_ingredients = request.form['selected_ingredients'].split(',')
         flashcard = Flashcard.query.get(flashcard_id)
         correct_ingredients = [ingredient.strip() for ingredient in flashcard.ingredients.split(',')]
         is_correct = set(selected_ingredients) == set(correct_ingredients)
@@ -88,11 +89,11 @@ def test():
         flashcard_id = session['flashcards'][current_index]
         flashcard = Flashcard.query.get(flashcard_id)
         all_ingredients = {ingredient.strip() for fc in Flashcard.query.all() for ingredient in fc.ingredients.split(',')}
-        return render_template('test.html', flashcard=flashcard, all_ingredients=all_ingredients, result=result)
+        categorized_ingredients = categorize_ingredients(all_ingredients, correct_ingredients)
+        return render_template('test.html', flashcard=flashcard, **categorized_ingredients, result=result)
 
     current_index = session.get('current_flashcard_index', 0)
     flashcards = session.get('flashcards', [])
-    print(f"Current Index: {current_index}, Flashcards: {flashcards}")  # Debugging statement
     if current_index >= len(flashcards):
         results = session.pop('results', [])
         return render_template('results.html', results=results)
@@ -100,8 +101,40 @@ def test():
     flashcard_id = flashcards[current_index]
     flashcard = Flashcard.query.get(flashcard_id)
     all_ingredients = {ingredient.strip() for fc in Flashcard.query.all() for ingredient in fc.ingredients.split(',')}
-    print(f"Flashcard: {flashcard}, All Ingredients: {all_ingredients}")  # Debugging statement
-    return render_template('test.html', flashcard=flashcard, all_ingredients=all_ingredients)
+    correct_ingredients = [ingredient.strip() for ingredient in flashcard.ingredients.split(',')]
+    categorized_ingredients = categorize_ingredients(all_ingredients, correct_ingredients)
+    return render_template('test.html', flashcard=flashcard, **categorized_ingredients)
 
+def categorize_ingredients(ingredients, correct_ingredients, limit=5):
+    def categorize(ingredient):
+        if 'water' in ingredient or 'juice' in ingredient or 'syrup' in ingredient:
+            return 'liquids'
+        elif 'powder' in ingredient or 'sugar' in ingredient:
+            return 'solids'
+        else:
+            return 'garnishes'
+
+    categorized = {'liquids': [], 'solids': [], 'garnishes': []}
+    correct_categorized = {'liquids': [], 'solids': [], 'garnishes': []}
+
+    for ingredient in ingredients:
+        category = categorize(ingredient)
+        categorized[category].append(ingredient)
+        if ingredient in correct_ingredients:
+            correct_categorized[category].append(ingredient)
+
+    def get_limited_category(category):
+        correct_items = correct_categorized[category]
+        optional_items = [ing for ing in categorized[category] if ing not in correct_items]
+        if len(correct_items) >= limit:
+            return correct_items[:limit]
+        else:
+            return correct_items + random.sample(optional_items, min(limit - len(correct_items), len(optional_items)))
+
+    return {
+        'liquids': get_limited_category('liquids'),
+        'solids': get_limited_category('solids'),
+        'garnishes': get_limited_category('garnishes')
+    }
 if __name__ == '__main__':
     app.run(debug=True)

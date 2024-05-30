@@ -1,5 +1,5 @@
 from models import db, Flashcard
-from app import app
+from app import app 
 
 def add_drinks():
     drinks = [
