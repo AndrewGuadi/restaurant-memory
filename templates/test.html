@@ -18,6 +18,13 @@
     <button type="submit" class="btn btn-success mt-3">Submit</button>
 </form>
 
+{% if result %}
+    <h2>Result</h2>
+    <p>Selected Ingredients: {{ result.selected_ingredients }}</p>
+    <p>Correct Ingredients: {{ result.correct_ingredients }}</p>
+    <p>Correct: {{ result.is_correct }}</p>
+{% endif %}
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const ingredients = document.querySelectorAll('.ingredient-item');

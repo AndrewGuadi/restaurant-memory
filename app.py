@@ -69,6 +69,8 @@ def test():
 
         result = {
             'flashcard_id': flashcard_id,
+            'dish': flashcard.dish,
+            'beverage': flashcard.beverage,
             'selected_ingredients': selected_ingredients,
             'correct_ingredients': correct_ingredients,
             'is_correct': is_correct
@@ -76,7 +78,17 @@ def test():
         results = session.get('results', [])
         results.append(result)
         session['results'] = results
+
+        current_index = session['current_flashcard_index']
         session['current_flashcard_index'] += 1
+
+        if current_index >= len(session['flashcards']):
+            return render_template('results.html', results=results)
+
+        flashcard_id = session['flashcards'][current_index]
+        flashcard = Flashcard.query.get(flashcard_id)
+        all_ingredients = {ingredient.strip() for fc in Flashcard.query.all() for ingredient in fc.ingredients.split(',')}
+        return render_template('test.html', flashcard=flashcard, all_ingredients=all_ingredients, result=result)
 
     current_index = session.get('current_flashcard_index', 0)
     flashcards = session.get('flashcards', [])
@@ -90,9 +102,6 @@ def test():
     all_ingredients = {ingredient.strip() for fc in Flashcard.query.all() for ingredient in fc.ingredients.split(',')}
     print(f"Flashcard: {flashcard}, All Ingredients: {all_ingredients}")  # Debugging statement
     return render_template('test.html', flashcard=flashcard, all_ingredients=all_ingredients)
-
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
