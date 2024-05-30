@@ -70,6 +70,5 @@ def grade():
     correct = set(selected_ingredients) == set(correct_ingredients)
     return render_template('grade.html', correct=correct, selected_ingredients=selected_ingredients, correct_ingredients=correct_ingredients)
 
-
 if __name__ == '__main__':
     app.run(debug=True)

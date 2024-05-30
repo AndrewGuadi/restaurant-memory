@@ -8,7 +8,9 @@
         <div id="ingredient{{ loop.index }}" class="ingredient-item" draggable="true">{{ ingredient }}</div>
     {% endfor %}
 </div>
-<div id="drop-zone" class="mt-4 p-3"></div>
+<div id="drop-zone" class="mt-4 p-3" style="border: 2px dashed #ccc; height: 200px; display: flex; align-items: center; justify-content: center;">
+    Drop ingredients here
+</div>
 
 <form method="POST" action="{{ url_for('grade') }}">
     <input type="hidden" name="flashcard_id" value="{{ flashcard.id }}">

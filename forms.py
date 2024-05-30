@@ -9,11 +9,10 @@ class FlashcardForm(FlaskForm):
     ingredients = TextAreaField('Ingredients', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
-    def validate(self):
-        rv = FlaskForm.validate(self)
-        if not rv:
+    def validate(self, extra_validators=None):
+        if not super(FlashcardForm, self).validate(extra_validators=extra_validators):
             return False
-        
+
         if not self.dish.data and not self.beverage.data:
             self.dish.errors.append('Either Dish or Beverage must be filled out.')
             self.beverage.errors.append('Either Dish or Beverage must be filled out.')
