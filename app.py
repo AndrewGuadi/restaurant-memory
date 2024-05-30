@@ -50,6 +50,7 @@ def select_category():
     if request.method == 'POST':
         category = request.form.get('category')
         flashcards = Flashcard.query.filter_by(category=category).all()
+        print(f"Selected Category: {category}, Flashcards: {flashcards}")  # Debugging statement
         session['flashcards'] = [flashcard.id for flashcard in flashcards]
         session['current_flashcard_index'] = 0
         session['results'] = []
@@ -67,7 +68,7 @@ def test():
         is_correct = set(selected_ingredients) == set(correct_ingredients)
 
         result = {
-            'flashcard': flashcard,
+            'flashcard_id': flashcard_id,
             'selected_ingredients': selected_ingredients,
             'correct_ingredients': correct_ingredients,
             'is_correct': is_correct
@@ -79,6 +80,7 @@ def test():
 
     current_index = session.get('current_flashcard_index', 0)
     flashcards = session.get('flashcards', [])
+    print(f"Current Index: {current_index}, Flashcards: {flashcards}")  # Debugging statement
     if current_index >= len(flashcards):
         results = session.pop('results', [])
         return render_template('results.html', results=results)
@@ -86,7 +88,11 @@ def test():
     flashcard_id = flashcards[current_index]
     flashcard = Flashcard.query.get(flashcard_id)
     all_ingredients = {ingredient.strip() for fc in Flashcard.query.all() for ingredient in fc.ingredients.split(',')}
+    print(f"Flashcard: {flashcard}, All Ingredients: {all_ingredients}")  # Debugging statement
     return render_template('test.html', flashcard=flashcard, all_ingredients=all_ingredients)
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

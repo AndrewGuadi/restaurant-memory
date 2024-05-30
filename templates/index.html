@@ -3,6 +3,7 @@
 {% block content %}
 <h1>Flashcards</h1>
 <a class="btn btn-primary" href="{{ url_for('add_card') }}">Add New Flashcard</a>
+<a class="btn btn-secondary" href="{{ url_for('select_category') }}">Start Test</a>
 <ul class="list-group mt-4">
     {% for card in flashcards %}
         <li class="list-group-item">{{ card.dish }} - {{ card.beverage }} - {{ card.ingredients }}
