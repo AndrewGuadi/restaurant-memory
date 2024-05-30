@@ -12,7 +12,7 @@
 
 <form method="POST" action="{{ url_for('grade') }}">
     <input type="hidden" name="flashcard_id" value="{{ flashcard.id }}">
-    <input type="hidden" name="ingredients" id="selected-ingredients">
+    <input type="hidden" name="selected_ingredients" id="selected-ingredients">
     <button type="submit">Submit</button>
 </form>
 
@@ -20,7 +20,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const ingredients = document.querySelectorAll('.ingredient-item');
     const dropZone = document.querySelector('#drop-zone');
-    const selectedIngredients = [];
+    let selectedIngredients = [];
 
     ingredients.forEach(ingredient => {
         ingredient.addEventListener('dragstart', handleDragStart);

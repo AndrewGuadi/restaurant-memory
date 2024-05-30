@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1>Test Result</h1>
-<p>You have {{ correct ? 'correctly' : 'incorrectly' }} identified the ingredients for the beverage.</p>
+<p>You have {% if correct %}correctly{% else %}incorrectly{% endif %} identified the ingredients for the beverage.</p>
 <p>Selected Ingredients: {{ selected_ingredients | join(', ') }}</p>
 <p>Correct Ingredients: {{ correct_ingredients | join(', ') }}</p>
 <a href="{{ url_for('test') }}">Try Again</a>
