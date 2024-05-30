@@ -3,17 +3,17 @@
 {% block content %}
 <h1>Test Yourself</h1>
 <p>Choose the ingredients for {{ flashcard.beverage }} by dragging the items into the drop zone.</p>
-<div id="ingredients-container">
+<div id="ingredients-container" class="d-flex flex-wrap">
     {% for ingredient in all_ingredients %}
         <div id="ingredient{{ loop.index }}" class="ingredient-item" draggable="true">{{ ingredient }}</div>
     {% endfor %}
 </div>
-<div id="drop-zone" style="min-height: 100px; border: 2px dashed #ddd; margin-top: 20px;"></div>
+<div id="drop-zone" class="mt-4 p-3"></div>
 
 <form method="POST" action="{{ url_for('grade') }}">
     <input type="hidden" name="flashcard_id" value="{{ flashcard.id }}">
     <input type="hidden" name="selected_ingredients" id="selected-ingredients">
-    <button type="submit">Submit</button>
+    <button type="submit" class="btn btn-success mt-3">Submit</button>
 </form>
 
 <script>

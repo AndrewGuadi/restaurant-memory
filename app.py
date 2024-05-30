@@ -57,13 +57,19 @@ def test():
 
 @app.route('/grade', methods=['POST'])
 def grade():
-    selected_ingredients = request.form.getlist('ingredients')
+    selected_ingredients = request.form.get('selected_ingredients')
+    if not selected_ingredients:
+        selected_ingredients = []
+    else:
+        selected_ingredients = selected_ingredients.split(',')
+
     flashcard_id = request.form.get('flashcard_id')
     flashcard = Flashcard.query.get(flashcard_id)
     correct_ingredients = [ingredient.strip() for ingredient in flashcard.ingredients.split(',')]
-    
+
     correct = set(selected_ingredients) == set(correct_ingredients)
     return render_template('grade.html', correct=correct, selected_ingredients=selected_ingredients, correct_ingredients=correct_ingredients)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
